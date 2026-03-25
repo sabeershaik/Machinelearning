@@ -1,0 +1,49 @@
+# Import libraries
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Models
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+
+# Load dataset (Iris)
+data = load_iris()
+X = data.data
+y = data.target
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Initialize models
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=200),
+    "KNN": KNeighborsClassifier(n_neighbors=5),
+    "Decision Tree": DecisionTreeClassifier(),
+    "Naive Bayes": GaussianNB(),
+    "SVM": SVC()
+}
+
+# Store results
+results = []
+
+# Train and evaluate each model
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
+    results.append([
+        name,
+        accuracy_score(y_test, y_pred),
+        precision_score(y_test, y_pred, average='weighted'),
+        recall_score(y_test, y_pred, average='weighted'),
+        f1_score(y_test, y_pred, average='weighted')
+    ])
+
+# Display results
+results_df = pd.DataFrame(results, columns=["Model", "Accuracy", "Precision", "Recall", "F1 Score"])
+print(results_df)

@@ -1,0 +1,55 @@
+DATASET
+battery_power,ram,px_height,px_width,mobile_wt,talk_time,price_range
+842,2549,20,756,188,19,1
+1021,2631,905,1988,136,7,2
+563,2603,1263,1716,145,9,2
+615,2769,1216,1786,131,11,2
+1821,1411,1208,1212,141,15,1
+1859,1067,1004,1654,164,10,1
+CODE
+# Import libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Upload dataset
+from google.colab import files
+uploaded = files.upload()
+
+# Load dataset
+df = pd.read_csv(list(uploaded.keys())[0])
+
+print("Dataset Preview:")
+print(df.head())
+
+# Features and Target
+X = df.drop('price_range', axis=1)
+y = df['price_range']
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Model
+model = RandomForestClassifier(n_estimators=100)
+
+# Train model
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("\nModel Evaluation:")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Test with new mobile
+print("\nTest with New Mobile:")
+
+new_mobile = [[1200, 3000, 1000, 1500, 150, 10]]  
+# battery, ram, px_height, px_width, weight, talk_time
+
+prediction = model.predict(new_mobile)
+
+print("Predicted Price Range:", prediction[0])

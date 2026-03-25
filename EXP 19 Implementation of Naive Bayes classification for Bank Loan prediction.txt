@@ -1,0 +1,68 @@
+DATASET
+Age,Income,Student,Credit_Rating,Loan_Approved
+<=30,High,No,Fair,No
+<=30,High,No,Excellent,No
+31-40,High,No,Fair,Yes
+>40,Medium,No,Fair,Yes
+>40,Low,Yes,Fair,Yes
+>40,Low,Yes,Excellent,No
+31-40,Low,Yes,Excellent,Yes
+<=30,Medium,No,Fair,No
+<=30,Low,Yes,Fair,Yes
+>40,Medium,Yes,Fair,Yes
+<=30,Medium,Yes,Excellent,Yes
+31-40,Medium,No,Excellent,Yes
+31-40,High,Yes,Fair,Yes
+>40,Medium,No,Excellent,No
+CODE
+# Import libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, classification_report
+
+# Upload dataset
+from google.colab import files
+uploaded = files.upload()
+
+# Load dataset
+df = pd.read_csv(list(uploaded.keys())[0])
+
+print("Dataset Preview:")
+print(df.head())
+
+# Convert categorical data to numeric using Label Encoding
+le = LabelEncoder()
+for column in df.columns:
+    df[column] = le.fit_transform(df[column])
+
+# Features and Target
+X = df.drop('Loan_Approved', axis=1)
+y = df['Loan_Approved']
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Model
+model = CategoricalNB()
+
+# Train model
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("\nModel Evaluation:")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Test with new data
+print("\nTest with New Applicant:")
+
+# Example: <=30, Medium, Yes, Fair
+sample = [[0, 1, 1, 1]]  
+prediction = model.predict(sample)
+
+print("Loan Approval Prediction:", "Yes" if prediction[0] == 1 else "No")
