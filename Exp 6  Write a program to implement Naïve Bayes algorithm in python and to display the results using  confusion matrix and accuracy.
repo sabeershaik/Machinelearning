@@ -1,0 +1,58 @@
+# Naïve Bayes Implementation with Confusion Matrix & Accuracy
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix, accuracy_score
+
+# -----------------------------------
+# Step 1: Create Dataset
+# -----------------------------------
+# Simple dataset: Age, Income → Buy (0 = No, 1 = Yes)
+
+data = {
+    'Age': [22,25,47,52,46,56,48,55,60,62],
+    'Income': [15000,18000,52000,58000,50000,60000,54000,62000,65000,70000],
+    'Buy': [0,0,1,1,1,1,1,1,1,1]
+}
+
+df = pd.DataFrame(data)
+
+print("Dataset:\n", df)
+print("\n---------------------------------------")
+
+# -----------------------------------
+# Step 2: Split Data
+# -----------------------------------
+X = df[['Age', 'Income']]
+y = df['Buy']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+# -----------------------------------
+# Step 3: Train Naïve Bayes Model
+# -----------------------------------
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+# -----------------------------------
+# Step 4: Predictions
+# -----------------------------------
+y_pred = model.predict(X_test)
+
+# -----------------------------------
+# Step 5: Confusion Matrix & Accuracy
+# -----------------------------------
+cm = confusion_matrix(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Confusion Matrix:\n", cm)
+print("\nAccuracy:", accuracy)
+
+# -----------------------------------
+# Step 6: Test New Sample
+# -----------------------------------
+sample = [[40, 50000]]
+prediction = model.predict(sample)
+
+print("\nNew Sample (Age=40, Income=50000):", prediction[0])
