@@ -1,0 +1,86 @@
+# Candidate-Elimination Algorithm (Single Code)
+
+import pandas as pd
+
+# -----------------------------
+# Step 1: Create Dataset (CSV)
+# -----------------------------
+data = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Rainy', 'Cold', 'High', 'Strong', 'Warm', 'Change', 'No'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change', 'Yes']
+]
+
+columns = ['Sky', 'AirTemp', 'Humidity', 'Wind', 'Water', 'Forecast', 'EnjoySport']
+
+df = pd.DataFrame(data, columns=columns)
+df.to_csv('training_data.csv', index=False)
+
+print("Dataset:\n")
+print(df)
+print("\n---------------------------------------------")
+
+# -----------------------------
+# Step 2: Load Dataset
+# -----------------------------
+data = pd.read_csv('training_data.csv')
+
+attributes = data.iloc[:, :-1].values
+target = data.iloc[:, -1].values
+
+# -----------------------------
+# Step 3: Initialize S and G
+# -----------------------------
+S = ['0'] * len(attributes[0])
+G = [['?'] * len(attributes[0])]
+
+print("Initial S:", S)
+print("Initial G:", G)
+print("---------------------------------------------")
+
+# -----------------------------
+# Step 4: Consistency Function
+# -----------------------------
+def is_consistent(h, x):
+    for i in range(len(h)):
+        if h[i] != '?' and h[i] != x[i]:
+            return False
+    return True
+
+# -----------------------------
+# Step 5: Candidate-Elimination
+# -----------------------------
+for i in range(len(attributes)):
+    if target[i] == "Yes":  # Positive example
+        for j in range(len(S)):
+            if S[j] == '0':
+                S[j] = attributes[i][j]
+            elif S[j] != attributes[i][j]:
+                S[j] = '?'
+
+        # Remove inconsistent hypotheses from G
+        G = [g for g in G if is_consistent(g, attributes[i])]
+
+    else:  # Negative example
+        new_G = []
+        for g in G:
+            if is_consistent(g, attributes[i]):
+                for j in range(len(g)):
+                    if g[j] == '?':
+                        if S[j] != attributes[i][j]:
+                            new_h = g.copy()
+                            new_h[j] = S[j]
+                            new_G.append(new_h)
+        G = new_G
+
+    print(f"After Example {i+1}:")
+    print("S =", S)
+    print("G =", G)
+    print("---------------------------------------------")
+
+# -----------------------------
+# Step 6: Final Output
+# -----------------------------
+print("\nFinal Specific Hypothesis (S):", S)
+print("Final General Hypotheses (G):", G)
