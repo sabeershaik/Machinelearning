@@ -1,0 +1,61 @@
+# K-Nearest Neighbours (K-NN) Implementation
+
+import numpy as np
+from collections import Counter
+
+# -----------------------------------
+# Step 1: Dataset
+# -----------------------------------
+# Example: Height, Weight → Class (0 = Underweight, 1 = Normal)
+
+X = np.array([
+    [150, 45],
+    [160, 50],
+    [170, 65],
+    [180, 80],
+    [155, 48],
+    [165, 55]
+])
+
+y = np.array([0, 0, 1, 1, 0, 1])
+
+# -----------------------------------
+# Step 2: Distance Function
+# -----------------------------------
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+# -----------------------------------
+# Step 3: K-NN Algorithm
+# -----------------------------------
+def knn(X, y, query, k=3):
+    distances = []
+    
+    # Calculate distance from all points
+    for i in range(len(X)):
+        dist = euclidean_distance(query, X[i])
+        distances.append((dist, y[i]))
+    
+    # Sort distances
+    distances.sort(key=lambda x: x[0])
+    
+    # Get k nearest neighbors
+    neighbors = distances[:k]
+    
+    # Get labels
+    labels = [label for _, label in neighbors]
+    
+    # Majority voting
+    result = Counter(labels).most_common(1)[0][0]
+    
+    return result
+
+# -----------------------------------
+# Step 4: Test New Sample
+# -----------------------------------
+query = np.array([168, 60])  # New data point
+
+result = knn(X, y, query, k=3)
+
+print("New Sample:", query)
+print("Predicted Class:", result)
