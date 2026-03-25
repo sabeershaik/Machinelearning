@@ -1,0 +1,113 @@
+# ID3 Algorithm Implementation (Complete Demo)
+
+import pandas as pd
+import math
+
+# -----------------------------------
+# Step 1: Create Dataset
+# -----------------------------------
+data = {
+    'Outlook': ['Sunny','Sunny','Overcast','Rain','Rain','Rain','Overcast','Sunny','Sunny','Rain','Sunny','Overcast','Overcast','Rain'],
+    'Temperature': ['Hot','Hot','Hot','Mild','Cool','Cool','Mild','Cool','Mild','Mild','Mild','Mild','Hot','Mild'],
+    'Humidity': ['High','High','High','High','Normal','Normal','Normal','High','Normal','Normal','Normal','High','Normal','High'],
+    'Wind': ['Weak','Strong','Weak','Weak','Weak','Strong','Strong','Weak','Weak','Weak','Strong','Strong','Weak','Strong'],
+    'PlayTennis': ['No','No','Yes','Yes','Yes','No','Yes','No','Yes','Yes','Yes','Yes','Yes','No']
+}
+
+df = pd.DataFrame(data)
+print("Dataset:\n", df)
+print("\n----------------------------------------")
+
+# -----------------------------------
+# Step 2: Entropy Function
+# -----------------------------------
+def entropy(target_col):
+    values = target_col.value_counts()
+    ent = 0
+    for val in values:
+        p = val / len(target_col)
+        ent -= p * math.log2(p)
+    return ent
+
+# -----------------------------------
+# Step 3: Information Gain
+# -----------------------------------
+def info_gain(df, attr, target):
+    total_entropy = entropy(df[target])
+    values = df[attr].unique()
+    
+    weighted_entropy = 0
+    for val in values:
+        subset = df[df[attr] == val]
+        weighted_entropy += (len(subset)/len(df)) * entropy(subset[target])
+    
+    return total_entropy - weighted_entropy
+
+# -----------------------------------
+# Step 4: ID3 Algorithm
+# -----------------------------------
+def id3(df, attributes, target):
+    
+    # If all examples same → return label
+    if len(df[target].unique()) == 1:
+        return df[target].iloc[0]
+    
+    # If no attributes left → return majority
+    if len(attributes) == 0:
+        return df[target].mode()[0]
+    
+    # Find best attribute
+    gains = [info_gain(df, attr, target) for attr in attributes]
+    best_attr = attributes[gains.index(max(gains))]
+    
+    tree = {best_attr: {}}
+    
+    for val in df[best_attr].unique():
+        subset = df[df[best_attr] == val]
+        
+        if subset.empty:
+            tree[best_attr][val] = df[target].mode()[0]
+        else:
+            new_attrs = [a for a in attributes if a != best_attr]
+            tree[best_attr][val] = id3(subset, new_attrs, target)
+    
+    return tree
+
+# -----------------------------------
+# Step 5: Build Tree
+# -----------------------------------
+attributes = list(df.columns[:-1])
+tree = id3(df, attributes, 'PlayTennis')
+
+print("Decision Tree:\n")
+print(tree)
+
+# -----------------------------------
+# Step 6: Classification Function
+# -----------------------------------
+def classify(sample, tree):
+    if not isinstance(tree, dict):
+        return tree
+    
+    root = next(iter(tree))
+    value = sample[root]
+    
+    if value in tree[root]:
+        return classify(sample, tree[root][value])
+    else:
+        return "Unknown"
+
+# -----------------------------------
+# Step 7: Test New Sample
+# -----------------------------------
+sample = {
+    'Outlook': 'Sunny',
+    'Temperature': 'Cool',
+    'Humidity': 'High',
+    'Wind': 'Strong'
+}
+
+result = classify(sample, tree)
+
+print("\nNew Sample:", sample)
+print("Classification Result:", result)
