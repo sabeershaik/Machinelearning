@@ -1,0 +1,61 @@
+# Expectation-Maximization (EM) Algorithm Implementation
+
+import numpy as np
+from scipy.stats import norm
+
+# -----------------------------------
+# Step 1: Dataset (1D data)
+# -----------------------------------
+X = np.array([1, 2, 3, 8, 9, 10])  # Two clusters
+
+# -----------------------------------
+# Step 2: Initialize Parameters
+# -----------------------------------
+# Means
+mu1, mu2 = 2.0, 9.0
+
+# Standard deviations
+sigma1, sigma2 = 1.0, 1.0
+
+# Mixing coefficients
+pi1, pi2 = 0.5, 0.5
+
+# -----------------------------------
+# Step 3: EM Algorithm
+# -----------------------------------
+iterations = 10
+
+for step in range(iterations):
+    
+    # ---- E-Step ----
+    r1 = pi1 * norm.pdf(X, mu1, sigma1)
+    r2 = pi2 * norm.pdf(X, mu2, sigma2)
+    
+    total = r1 + r2
+    r1 /= total
+    r2 /= total
+    
+    # ---- M-Step ----
+    N1 = np.sum(r1)
+    N2 = np.sum(r2)
+    
+    mu1 = np.sum(r1 * X) / N1
+    mu2 = np.sum(r2 * X) / N2
+    
+    sigma1 = np.sqrt(np.sum(r1 * (X - mu1)**2) / N1)
+    sigma2 = np.sqrt(np.sum(r2 * (X - mu2)**2) / N2)
+    
+    pi1 = N1 / len(X)
+    pi2 = N2 / len(X)
+    
+    print(f"Iteration {step+1}:")
+    print(f"mu1 = {mu1:.2f}, sigma1 = {sigma1:.2f}, pi1 = {pi1:.2f}")
+    print(f"mu2 = {mu2:.2f}, sigma2 = {sigma2:.2f}, pi2 = {pi2:.2f}")
+    print("-------------------------------------")
+
+# -----------------------------------
+# Step 4: Final Result
+# -----------------------------------
+print("\nFinal Parameters:")
+print(f"Cluster 1 → Mean: {mu1:.2f}, Std: {sigma1:.2f}")
+print(f"Cluster 2 → Mean: {mu2:.2f}, Std: {sigma2:.2f}")
