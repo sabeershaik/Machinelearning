@@ -1,0 +1,84 @@
+# Artificial Neural Network using Backpropagation (Single Code)
+
+import numpy as np
+
+# -----------------------------------
+# Step 1: Dataset (XOR Problem)
+# -----------------------------------
+# Inputs
+X = np.array([
+    [0,0],
+    [0,1],
+    [1,0],
+    [1,1]
+])
+
+# Outputs
+y = np.array([[0],[1],[1],[0]])
+
+# -----------------------------------
+# Step 2: Activation Function
+# -----------------------------------
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# -----------------------------------
+# Step 3: Initialize Weights
+# -----------------------------------
+np.random.seed(1)
+
+input_neurons = 2
+hidden_neurons = 2
+output_neurons = 1
+
+# Weights
+W1 = np.random.rand(input_neurons, hidden_neurons)
+W2 = np.random.rand(hidden_neurons, output_neurons)
+
+# Bias
+b1 = np.random.rand(1, hidden_neurons)
+b2 = np.random.rand(1, output_neurons)
+
+# -----------------------------------
+# Step 4: Training using Backpropagation
+# -----------------------------------
+epochs = 10000
+lr = 0.1
+
+for epoch in range(epochs):
+    
+    # ---- Forward Pass ----
+    hidden_input = np.dot(X, W1) + b1
+    hidden_output = sigmoid(hidden_input)
+    
+    final_input = np.dot(hidden_output, W2) + b2
+    output = sigmoid(final_input)
+    
+    # ---- Error ----
+    error = y - output
+    
+    # ---- Backpropagation ----
+    d_output = error * sigmoid_derivative(output)
+    
+    error_hidden = d_output.dot(W2.T)
+    d_hidden = error_hidden * sigmoid_derivative(hidden_output)
+    
+    # ---- Update Weights ----
+    W2 += hidden_output.T.dot(d_output) * lr
+    W1 += X.T.dot(d_hidden) * lr
+    
+    b2 += np.sum(d_output, axis=0, keepdims=True) * lr
+    b1 += np.sum(d_hidden, axis=0, keepdims=True) * lr
+
+# -----------------------------------
+# Step 5: Testing
+# -----------------------------------
+print("Final Output after Training:\n")
+
+for i in range(len(X)):
+    hidden = sigmoid(np.dot(X[i], W1) + b1)
+    out = sigmoid(np.dot(hidden, W2) + b2)
+    print(f"Input: {X[i]} → Output: {out.round(3)}")
