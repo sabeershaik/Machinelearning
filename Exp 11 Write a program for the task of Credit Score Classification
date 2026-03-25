@@ -1,0 +1,62 @@
+# Credit Score Classification using Logistic Regression
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# -----------------------------------
+# Step 1: Create Dataset
+# -----------------------------------
+# Features: Income, Loan Amount, Credit History → Credit Score (0=Low,1=High)
+
+data = {
+    'Income': [25000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000],
+    'Loan':   [20000, 25000, 20000, 30000, 25000, 20000, 30000, 25000, 20000, 15000],
+    'History':[0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+    'Score':  [0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
+}
+
+df = pd.DataFrame(data)
+
+print("Dataset:\n", df)
+print("\n------------------------------------------")
+
+# -----------------------------------
+# Step 2: Split Data
+# -----------------------------------
+X = df[['Income', 'Loan', 'History']]
+y = df['Score']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=0
+)
+
+# -----------------------------------
+# Step 3: Train Model
+# -----------------------------------
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# -----------------------------------
+# Step 4: Prediction
+# -----------------------------------
+y_pred = model.predict(X_test)
+
+# -----------------------------------
+# Step 5: Evaluation
+# -----------------------------------
+accuracy = accuracy_score(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)
+
+print("Confusion Matrix:\n", cm)
+print("\nAccuracy:", accuracy)
+
+# -----------------------------------
+# Step 6: Test New Customer
+# -----------------------------------
+# Example: Income=55000, Loan=25000, History=1
+new_customer = [[55000, 25000, 1]]
+prediction = model.predict(new_customer)
+
+print("\nNew Customer Prediction (0=Low,1=High):", prediction[0])
